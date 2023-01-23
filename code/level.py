@@ -10,7 +10,7 @@ class Level:
         self._display_surface = pygame.display.get_surface()
 
         # Sprite group setup
-        self._visible_sprites = pygame.sprite.Group()
+        self._visible_sprites = YSortCameraGroup()
         self._obstacle_sprites = pygame.sprite.Group()
 
         # Sprite setup
@@ -24,10 +24,28 @@ class Level:
                 if col == 'x':
                     Tile((x,y),[self._visible_sprites,self._obstacle_sprites])
                 if col == 'p':
-                    Player((x, y),[self._visible_sprites], self._obstacle_sprites)
+                    self.player = Player((x, y),[self._visible_sprites], self._obstacle_sprites)
 
 
     def run(self):
         # Update and draw the game
-        self._visible_sprites.draw(self._display_surface)
+        self._visible_sprites.custom_draw(self.player)
         self._visible_sprites.update()
+
+class YSortCameraGroup(pygame.sprite.Group):
+    def __init__(self):
+        
+        super().__init__()
+        self._display_surface = pygame.display.get_surface()
+        self._half_width = self._display_surface.get_size()[0] // 2
+        self._half_height = self._display_surface.get_size()[1] // 2
+        self._offset = pygame.math.Vector2()
+
+    def custom_draw(self, player):
+        # offset
+        self._offset.x = player.rect.centerx - self._half_width
+        self._offset.y = player.rect.centery - self._half_height
+
+        for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
+            offset_pos = sprite.rect.topleft - self._offset
+            self._display_surface.blit(sprite.image, offset_pos )
