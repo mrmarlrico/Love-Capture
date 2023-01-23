@@ -5,6 +5,7 @@ from player import Player
 from support import import_csv_layout
 from support import import_folder
 from random import choice
+from debug import debug
 
 class Level:
     def __init__(self):
@@ -54,6 +55,7 @@ class Level:
         # Update and draw the game
         self._visible_sprites.custom_draw(self.player)
         self._visible_sprites.update()
+        debug(self.player.status)
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
