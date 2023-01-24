@@ -3,7 +3,7 @@ from settings import *
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, group, obstacle_sprites):
+	def __init__(self, pos, group, obstacle_sprites, create_attack, destroy_attack):
 		super().__init__(group)
 		self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -21,6 +21,15 @@ class Player(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cd = 400
 		self.attack_time = None
+
+		# Weapon
+		self.create_attack = create_attack
+		self.destroy_attack = destroy_attack
+		self.weapon_index = 0
+		self.weapon = list(weapon_data.keys())[self.weapon_index]
+		self.can_switch = True
+		self.weapon_switch_time = None
+		self.switch_cd = 200
 
 		self.obstacle_sprites = obstacle_sprites
 	
@@ -57,12 +66,24 @@ class Player(pygame.sprite.Sprite):
 			if keys[pygame.K_SPACE]:
 				self.attacking = True
 				self.attack_time = pygame.time.get_ticks()
-				print('attack')
+				self.create_attack()
 			# Magic input
 			if keys[pygame.K_LCTRL]:
 				self.attacking = True
 				self.attack_time = pygame.time.get_ticks()
 				print('magic')
+			# Change weapon
+			if keys[pygame.K_q] and self.can_switch:
+				self.can_switch = False
+				self.weapon_switch_time = pygame.time.get_ticks()
+				if self.weapon_index < len(list(weapon_data.keys())) - 1:
+					self.weapon_index += 1
+				else:
+					self.weapon_index = 0
+
+				self.weapon = list(weapon_data.keys())[self.weapon_index]
+
+
 
 	def get_status(self):
 		# idle status
@@ -113,6 +134,10 @@ class Player(pygame.sprite.Sprite):
 		if self.attacking:
 			if curr_time - self.attack_time >= self.attack_cd:
 				self.attacking = False
+				self.destroy_attack()
+			if not self.can_switch:
+				if curr_time - self.weapon_switch_time >= self.switch_cd:
+					self.can_switch = True
 
 	def animate(self):
 		animation = self.animations[self.status]
