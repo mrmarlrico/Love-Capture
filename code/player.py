@@ -21,6 +21,7 @@ class Player(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cd = 400
 		self.attack_time = None
+		self.obstacle_sprites = obstacle_sprites
 
 		# Weapon
 		self.create_attack = create_attack
@@ -31,8 +32,13 @@ class Player(pygame.sprite.Sprite):
 		self.weapon_switch_time = None
 		self.switch_cd = 200
 
-		self.obstacle_sprites = obstacle_sprites
-	
+		# Player stats
+		self.stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
+		self.health = self.stats['health']
+		self.energy = self.stats['energy']
+		self.exp = 123
+		self.speed = self.stats['speed']
+
 	def import_player_assets(self):
 		character_path = '../graphics/player/'
 		self.animations = {
@@ -82,8 +88,6 @@ class Player(pygame.sprite.Sprite):
 					self.weapon_index = 0
 
 				self.weapon = list(weapon_data.keys())[self.weapon_index]
-
-
 
 	def get_status(self):
 		# idle status
@@ -135,9 +139,9 @@ class Player(pygame.sprite.Sprite):
 			if curr_time - self.attack_time >= self.attack_cd:
 				self.attacking = False
 				self.destroy_attack()
-			if not self.can_switch:
-				if curr_time - self.weapon_switch_time >= self.switch_cd:
-					self.can_switch = True
+		if not self.can_switch:
+			if curr_time - self.weapon_switch_time >= self.switch_cd:
+				self.can_switch = True
 
 	def animate(self):
 		animation = self.animations[self.status]
